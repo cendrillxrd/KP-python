@@ -81,7 +81,7 @@ two_img = two_img.subsample(15, 15)
 dict_routes = {
     2: {'name': 'Маршрут №2', 'image': two_img},
     7: {'name': 'Маршрут №7', 'image': seven_img},
-    77: {'name': 'Маршрут №77', 'image': seven_img}
+    # 77: {'name': 'Маршрут №77', 'image': seven_img}
 }
 
 frame2 = ttk.Frame(borderwidth=0, padding=8)

@@ -1,5 +1,5 @@
 import json
-
+import DATABASE.database as db
 
 def extract_points(data):
     """Извлекает данные из ключа "points" во всех вложенных словарях.
@@ -42,7 +42,7 @@ def extract_stops(data):
     return list(zip(all_stops_name, all_stops))
 
 # Загружаем данные (замените на ваш источник данных)
-with open('data77.json', 'r', encoding='utf-8') as f:
+with open('C:/Users/Admin/PycharmProjects/КП/JsonFilesImport/data7.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 
 # Извлекаем точки
@@ -51,6 +51,8 @@ result_stop = extract_stops(data)
 print(result)
 print()
 print(result_stop)
-# db.set_bus_stops(result_stop, 77)
+
+# db.set_bus_stops(result_stop, 7)
+# db.set_bus_stops(result_stop, 7)
 # Выводим результат (для проверки)
 
