@@ -5,9 +5,19 @@ from tkinter import messagebox
 
 
 def open_window():
+
     autorization_root = tk.Tk()
     autorization_root.title('Окно авторизации')
-    ttk.Button(autorization_root, text='Кнопка', command=lambda: verify_login(autorization_root)).grid()
+    autorization_root.geometry("300x200")
+    autorization_root.resizable(False, False)
+    style = ttk.Style()
+    style.theme_use('default')
+    style.configure('TButton', padding=10, relief='flat', background='lightblue')
+    style.configure('TLabel', font=('Helvetica', 12))
+    style.configure('TEntry', font=('Helvetica', 12))
+    frame = ttk.Frame(autorization_root, padding=10)
+    frame.pack()
+    ttk.Button(frame, text='Кнопка', command=lambda: verify_login(autorization_root)).grid()
     autorization_root.mainloop()
 
 
