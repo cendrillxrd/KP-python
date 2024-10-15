@@ -17,9 +17,8 @@ class BusRoute:
         self.schedule = schedule
         self.path = path
 
-    @staticmethod
     def get_schedule(self):
-        return f"Каждые {self.time} минут"
+        return f"Каждые {self.schedule.time} минут"
 
     @staticmethod
     def get_info(self):

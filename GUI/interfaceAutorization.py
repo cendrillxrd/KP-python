@@ -86,6 +86,7 @@ def open_reg_window(autorization_root):
 
     new_window.protocol("WM_DELETE_WINDOW", on_closing)
 
+
 def reg_user_command(login, password, window, autorization_root):
     user_set = db.set_user(login, password)
     if user_set:
