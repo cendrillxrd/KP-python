@@ -2,34 +2,95 @@ import tkinter as tk
 from tkinter import ttk
 from GUI.interface import startMain
 from tkinter import messagebox
+import customtkinter as ctk
+from PIL import Image, ImageTk
+import DATABASE.database_2 as db
 
 
 def open_window():
+    class ClickableLabel(ctk.CTkLabel):
+        def __init__(self, master, **kwargs):
+            super().__init__(master, **kwargs)
+            self.bind("<Button-1>", self.registration)
+
+        def registration(self, event):
+            # db.set_user(login_entry.get(), password_entry.get())
+            open_reg_window(autorization_root)
 
     autorization_root = tk.Tk()
     autorization_root.title('Окно авторизации')
-    autorization_root.geometry("300x200")
+    autorization_root.geometry("500x400+525+200")
     autorization_root.resizable(False, False)
+
     style = ttk.Style()
-    style.theme_use('default')
-    style.configure('TButton', padding=10, relief='flat', background='lightblue')
-    style.configure('TLabel', font=('Helvetica', 12))
-    style.configure('TEntry', font=('Helvetica', 12))
+    style.configure('TButton', font=('Bolt', 20), padding=(10, 10))
+
     frame = ttk.Frame(autorization_root, padding=10)
     frame.pack()
-    ttk.Button(frame, text='Кнопка', command=lambda: verify_login(autorization_root)).grid()
+    ttk.Label(frame, text='Авторизация', font=('Bolt', 20)).grid(column=0, columnspan=2, padx=10, pady=10)
+    ttk.Label(frame, text='Логин', font=('Bolt', 16)).grid(column=0, row=1, padx=10, pady=10)
+    login_entry = ttk.Entry(frame, font=('Bolt', 16))
+    login_entry.grid(column=1, row=1, padx=10, pady=10)
+    ttk.Label(frame, text='Пароль', font=('Bolt', 16)).grid(column=0, row=2, padx=10, pady=10)
+    password_entry = ttk.Entry(frame, font=('Bolt', 16), show='*')
+    password_entry.grid(column=1, row=2, padx=10, pady=10)
+
+    reg_label = ClickableLabel(frame, text='Регистрация', font=('Bolt', 16), text_color='blue')
+    reg_label.grid(column=0, row=3, columnspan=2, padx=10, pady=10)
+
+    ttk.Button(frame, text='Войти',
+               command=lambda: verify_login(login_entry.get(), password_entry.get(), autorization_root),
+               style='TButton').grid(column=0, columnspan=2, padx=10, pady=10)
+
+    image = Image.open("C:/Users/Admin/PycharmProjects/КП/Resources/bus_autoriz.png")
+    image = image.resize((100, 100))
+    photo = ImageTk.PhotoImage(image)
+    # Создаем метку и устанавливаем изображение
+    label = ttk.Label(frame, image=photo)
+    label.grid(column=0, columnspan=2, padx=10, pady=10)
+
     autorization_root.mainloop()
 
 
-def verify_login(login_window):
-    # username, password, login_window
-    # Здесь реализуйте логику проверки данных авторизации
-    # Например, сравнение с хранимыми в базе данных значениями
-    # if username == "admin" and password == "password":
-    #     login_window.destroy()  # Закрываем окно авторизации
-    #     main_window()  # Открываем основное окно
-    # else:
-    #     messagebox.showerror("Ошибка", "Неверный логин или пароль")
-    if True:
+def verify_login(username, password, login_window):
+    if db.user_check(username, password):
         login_window.destroy()
         startMain()
+    else:
+        messagebox.showerror("Ошибка", "Неверный логин или пароль")
+
+
+def open_reg_window(autorization_root):
+    autorization_root.withdraw()
+    # Создаем новое окно
+    new_window = tk.Toplevel(autorization_root)
+    new_window.title('Окно авторизации')
+    new_window.geometry("400x300+575+250")
+    new_window.resizable(False, False)
+    frame = ttk.Frame(new_window, padding=10)
+    frame.pack()
+    ttk.Label(frame, text='Регистрация', font=('Bolt', 20)).grid(column=0, columnspan=2, padx=10, pady=10)
+    ttk.Label(frame, text='Логин', font=('Bolt', 16)).grid(column=0, row=1, padx=10, pady=10)
+    login_entry = ttk.Entry(frame, font=('Bolt', 16))
+    login_entry.grid(column=1, row=1, padx=10, pady=10)
+    ttk.Label(frame, text='Пароль', font=('Bolt', 16)).grid(column=0, row=2, padx=10, pady=10)
+    password_entry = ttk.Entry(frame, font=('Bolt', 16), show='*')
+    password_entry.grid(column=1, row=2, padx=10, pady=10)
+    ttk.Button(frame, text='Зарегистрироваться',
+               command=lambda: reg_user_command(login_entry.get(), password_entry.get(), new_window, autorization_root),
+               style='TButton').grid(column=0, columnspan=2, padx=10, pady=10)
+
+    def on_closing():
+        autorization_root.deiconify()
+        new_window.destroy()
+
+    new_window.protocol("WM_DELETE_WINDOW", on_closing)
+
+def reg_user_command(login, password, window, autorization_root):
+    user_set = db.set_user(login, password)
+    if user_set:
+        messagebox.showinfo("Инфо", "Регистрация выполнена успешно")
+        autorization_root.deiconify()
+        window.destroy()
+    else:
+        messagebox.showerror("Инфо", "Ошибка регистрации, такой пользователь уже существует")

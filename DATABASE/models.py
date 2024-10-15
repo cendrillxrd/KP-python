@@ -10,6 +10,12 @@ class BaseModel(Model):
         database = db
         order_by = 'id'
 
+class User(BaseModel):
+    login = TextField()
+    password = TextField()
+
+    class Meta:
+        db_table = 'users'
 
 class BusStop(BaseModel):
     name = TextField()

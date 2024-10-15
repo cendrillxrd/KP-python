@@ -1,20 +1,5 @@
 import tkintermapview
 
-
-# class BusSystem:
-#     def __init__(self):
-#         self.routes = []
-#
-#     def add_route(self, route):
-#         self.routes.append(route)
-#
-#     def remove_route(self, route_id):
-#         for route in self.routes:
-#             if route.id == route_id:
-#                 self.routes.remove(route)
-#                 return
-
-
 class BusStop:
     def __init__(self, id, name, coordinates):
         self.id = id
@@ -47,6 +32,3 @@ class Schedule:
         self.path_id = path_id
         self.time = time
 
-
-class User:
-    pass
