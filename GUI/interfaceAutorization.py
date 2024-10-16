@@ -13,7 +13,8 @@ def open_window():
             super().__init__(master, **kwargs)
             self.bind("<Button-1>", self.registration)
 
-        def registration(self, event):
+        @staticmethod
+        def registration(event):
             # db.set_user(login_entry.get(), password_entry.get())
             open_reg_window(autorization_root)
 

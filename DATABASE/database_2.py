@@ -61,6 +61,18 @@ def set_user(login, password):
             return True
 
 
+def info_about_bus_stop(coordinates):
+    with db:
+        bus_stops = BusStop.select().where(BusStop.coordinates == str(coordinates))
+        trans_list = []
+        for bus_stop in bus_stops:
+            id = bus_stop.id
+            bs_trans = BusStopTransport.select().where(BusStopTransport.stop_id == id)
+            for transport in bs_trans:
+                if transport.path_number not in trans_list:
+                    trans_list.append(transport.path_number)
+        return trans_list
+
 def user_check(login, password):
     with db:
         if User.select().where(User.login == login, User.password == password).exists():

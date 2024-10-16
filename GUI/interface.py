@@ -21,6 +21,7 @@ def startMain():
     root = tk.Tk()
     root.title("Автобусные маршруты")
     root.geometry("1400x700+30+30")
+    root.resizable(False, False)
 
     new_size_for_icon = (32, 32)
     new_size_for_numbers = (35, 35)
@@ -67,7 +68,7 @@ def startMain():
     frame1.rowconfigure(index=0, weight=1)
     frame1.rowconfigure(index=1, weight=1)
 
-    frame1_1 = ttk.Frame(frame1, borderwidth=1, relief='solid')
+    frame1_1 = ttk.Frame(frame1)
     frame1_1.grid(column=0, row=0, sticky='nsew')
 
     l1_1 = ttk.Label(frame1_1, text='Расписание и остановки маршрута №', padding=8, font=('Bolt', 12))
@@ -78,7 +79,7 @@ def startMain():
     frame1_2.columnconfigure(index=0, weight=1)
     frame1_2.rowconfigure(index=0, weight=0)
 
-    frame2 = ttk.Frame(borderwidth=1, relief='solid', padding=50)
+    frame2 = ttk.Frame(padding=50)
     frame2.grid(column=2, row=0, sticky='nsew')
     l2 = ttk.Label(frame2, text='Выберете маршрут', padding=8, font=('Bolt', 12))
     l2.grid(column=0, row=0, sticky='n')
@@ -179,11 +180,18 @@ def startMain():
         map_widget.set_path(bus_route.path, color=dict_colors[route_var.get()])
 
     def create_bus_stops(bus_stops):
+        def click_on_marker(marker):
+            trans_list = db.info_about_bus_stop(marker.position)
+
+
+            print(trans_list)
+
         for stop in bus_stops:
             map_widget.set_marker(stop.coordinates[0],
                                   stop.coordinates[1],
                                   text=stop.name,
-                                  icon=images_dict['bus_icon_img'])
+                                  icon=images_dict['bus_icon_img'],
+                                  command=click_on_marker)
 
     for route in dict_routes:
         ttk.Radiobutton(frame2,
