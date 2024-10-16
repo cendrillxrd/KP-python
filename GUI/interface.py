@@ -23,6 +23,16 @@ def startMain():
     root.geometry("1400x700+30+30")
     root.resizable(False, False)
 
+    # x = None
+    # y = None
+    # def on_click(event):
+    #     global x
+    #     global y
+    #     x, y = event.x, event.y
+    #     print(f"Координаты курсора: x={x}, y={y}")
+    #
+    # root.bind('<Button-1>', on_click)
+
     new_size_for_icon = (32, 32)
     new_size_for_numbers = (35, 35)
 
@@ -181,10 +191,22 @@ def startMain():
 
     def create_bus_stops(bus_stops):
         def click_on_marker(marker):
+
             trans_list = db.info_about_bus_stop(marker.position)
+            popup = tk.Toplevel()  # Создаем новое окно
+            popup.wm_title("Маршруты")
+            popup.overrideredirect(True)
+            # Определяем текст окна
+            label = ttk.Label(popup, text=f"Маршруты: {trans_list}", font='Bolt')
+            label.pack()
 
-
-            print(trans_list)
+            # Размещаем окно выше курсора мыши
+            x = popup.winfo_pointerx()
+            y = popup.winfo_pointery() - 30  # Поднимаем окно немного вверх
+            popup.geometry(f"+{x}+{y}")  # Устанавливаем позицию окна
+            popup.after(3000, popup.destroy)
+            # Закрываем окно при клике
+            popup.bind("<Button-1>", lambda e: popup.destroy())
 
         for stop in bus_stops:
             map_widget.set_marker(stop.coordinates[0],
