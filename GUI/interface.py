@@ -89,10 +89,13 @@ def startMain():
     frame1_2.columnconfigure(index=0, weight=1)
     frame1_2.rowconfigure(index=0, weight=0)
 
-    frame2 = ttk.Frame(padding=50)
+    frame2 = ttk.Frame(padding=10)
     frame2.grid(column=2, row=0, sticky='nsew')
     l2 = ttk.Label(frame2, text='Выберете маршрут', padding=8, font=('Bolt', 12))
     l2.grid(column=0, row=0, sticky='n')
+
+    frame2_1 = ttk.Frame(frame2, padding=8)
+    frame2_1.grid()
 
     bus_stops_list = tk.Listbox(frame1_1, height=20)
     bus_stops_list.grid(padx=10, pady=10, sticky='nsew')
@@ -192,12 +195,19 @@ def startMain():
     def create_bus_stops(bus_stops):
         def click_on_marker(marker):
 
-            trans_list = db.info_about_bus_stop(marker.position)
+            trans_list = list(map(str,db.info_about_bus_stop(marker.position)))
+            trans_str = ', '.join(trans_list)
+
             popup = tk.Toplevel()  # Создаем новое окно
             popup.wm_title("Маршруты")
             popup.overrideredirect(True)
+
             # Определяем текст окна
-            label = ttk.Label(popup, text=f"Маршруты: {trans_list}", font='Bolt')
+            frame = tk.Frame(popup, relief=tk.RIDGE, borderwidth=4,  bg="blue")
+            frame.pack()  # Отступы для создания видимой границы
+
+            # Размещаем метку внутри рамки
+            label = ttk.Label(frame, text=f"Маршруты: {trans_str}", font='Bolt', background='#AFE7E1')
             label.pack()
 
             # Размещаем окно выше курсора мыши
@@ -216,12 +226,12 @@ def startMain():
                                   command=click_on_marker)
 
     for route in dict_routes:
-        ttk.Radiobutton(frame2,
+        ttk.Radiobutton(frame2_1,
                         text=dict_routes[route]['name'],
                         variable=route_var,
                         value=route,
                         command=radiobutton_command,
                         compound='left',
                         image=dict_routes[route]['image']
-                        ).grid(column=0, row=route)
+                        ).grid(column=0, row=route, sticky='w')
     root.mainloop()
