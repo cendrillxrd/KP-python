@@ -1,5 +1,6 @@
 import tkintermapview
 
+
 class BusStop:
     def __init__(self, id, name, coordinates):
         self.id = id
@@ -30,4 +31,3 @@ class Schedule:
         self.id = id
         self.path_id = path_id
         self.time = time
-

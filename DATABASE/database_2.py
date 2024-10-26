@@ -3,9 +3,8 @@ from DATABASE.models import *
 import Classes.classes as cl
 import re
 
-
-# with db:
-#     db.create_tables([User])
+with db:
+    db.create_tables([User])
 
 
 def set_bus_stops(stops_list, number, direction):
@@ -56,8 +55,8 @@ def set_user(login, password):
             return False
         else:
             User(login=login,
-                 password=password
-                 ).save()
+                 password=password,
+                 admin=False).save()
             return True
 
 
@@ -73,12 +72,10 @@ def info_about_bus_stop(coordinates):
                     trans_list.append(transport.path_number)
         return trans_list
 
+
 def user_check(login, password):
     with db:
-        if User.select().where(User.login == login, User.password == password).exists():
-            return True
-        else:
-            return False
+        return User.select().where(User.login == login, User.password == password).exists()
 
 
 def generate_tuple_path(path_str):
@@ -137,3 +134,20 @@ def get_end_bus_stop(number, dir, need_coords=True):
 def delete_stops(id):
     with db:
         BusStop[id].delete_instance()
+
+
+def is_admin(username):
+    return User.get(login=username).admin
+
+
+def is_active(route_number):
+    with db:
+        return BusRoute.select().where(BusRoute.number == route_number, BusRoute.active == True).exists()
+
+
+def change_route_state(route_number):
+    with db:
+        route_list = BusRoute.select().where(BusRoute.number == route_number)
+        for route in route_list:
+            route.active = not route.active
+            route.save()

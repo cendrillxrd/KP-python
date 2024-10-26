@@ -8,7 +8,7 @@ from JsonFilesImport.generate_paths_and_stops import *
 
 # print(db.get_end_bus_stop(7, True, need_coords=False))
 # generate_info(77, True, 20)
-startMain()
+startMain(True)
 # open_window()
 # print(db.get_end_bus_stop(7, False, False))
 # print(db.get_end_bus_stop(7, True, False))

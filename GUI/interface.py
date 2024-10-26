@@ -1,8 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter.messagebox import showinfo
+
 import tkintermapview
 from PIL import Image, ImageTk
 import DATABASE.database_2 as db
+
 import Classes.classes as cl
 
 
@@ -17,21 +20,27 @@ def load_image(image_path, size):
         return None
 
 
-def startMain():
+def checkbutton_state(route_number):
+    if db.is_active(route_number):
+        return 1
+    else:
+        return 0
+
+
+def clear_frame(frame):
+    for widget in frame.winfo_children():
+        widget.destroy()
+
+
+def startMain(is_admin):
     root = tk.Tk()
     root.title("Автобусные маршруты")
-    root.geometry("1400x700+30+30")
+    root.geometry("1400x725+30+30")
     root.resizable(False, False)
 
-    # x = None
-    # y = None
-    # def on_click(event):
-    #     global x
-    #     global y
-    #     x, y = event.x, event.y
-    #     print(f"Координаты курсора: x={x}, y={y}")
-    #
-    # root.bind('<Button-1>', on_click)
+    route_var = tk.IntVar()
+    direction_var = tk.BooleanVar()
+    map_var = tk.IntVar(value=1)
 
     new_size_for_icon = (32, 32)
     new_size_for_numbers = (35, 35)
@@ -52,7 +61,7 @@ def startMain():
     dict_routes = {
         2: {'name': 'Маршрут №2', 'image': images_dict['two_img']},
         7: {'name': 'Маршрут №7', 'image': images_dict['seven_img']},
-        77: {'name': 'Маршрут №77', 'image': images_dict['seventy_seven_img']}
+        77: {'name': 'Маршрут №77', 'image': images_dict['seventy_seven_img']},
     }
 
     dict_colors = {
@@ -61,19 +70,22 @@ def startMain():
         77: 'red'
     }
 
+    notebook = ttk.Notebook(root)
+    notebook.pack(fill=tk.X)
+    notebook.pack_propagate(False)
+
+    frame_admin = ttk.Frame(notebook)
+    frame_user = ttk.Frame(notebook)
+
     # create map widget
-    map_widget = tkintermapview.TkinterMapView(root, width=800, height=700, corner_radius=10)
+    map_widget = tkintermapview.TkinterMapView(frame_user, width=800, height=700, corner_radius=10)
     map_widget.grid(column=0, row=0)
     map_widget.set_position(45.040025, 38.976108)
     map_widget.set_zoom(13)
 
-    # map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
     map_widget.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
 
-    route_var = tk.IntVar()
-    direction_var = tk.BooleanVar()
-
-    frame1 = ttk.Frame()
+    frame1 = ttk.Frame(frame_user)
     frame1.grid(column=1, row=0, sticky='ns')
     frame1.rowconfigure(index=0, weight=1)
     frame1.rowconfigure(index=1, weight=1)
@@ -89,7 +101,7 @@ def startMain():
     frame1_2.columnconfigure(index=0, weight=1)
     frame1_2.rowconfigure(index=0, weight=0)
 
-    frame2 = ttk.Frame(padding=10)
+    frame2 = ttk.Frame(frame_user, padding=10)
     frame2.grid(column=2, row=0, sticky='nsew')
     l2 = ttk.Label(frame2, text='Выберете маршрут', padding=8, font=('Bolt', 12))
     l2.grid(column=0, row=0, sticky='n')
@@ -110,16 +122,29 @@ def startMain():
     l1_3 = ttk.Label(frame1_1, text='', font=('Bolt', 12))
     l1_3.grid(padx=10)
 
-    # frame1_2.columnconfigure(index=1, weight=1)
-    # frame1_2.rowconfigure(index=1, weight=0)
-    # frame1_2.columnconfigure(index=2, weight=1)
-    # frame1_2.rowconfigure(index=2, weight=0)
+    style = ttk.Style()
+    style.configure("TRadiobutton", font=('Helvetica', 14))
+
+    style1 = ttk.Style()
+    style1.configure("Default.TRadiobutton", font=('Helvetica', 10))
+
+    if is_admin:
+        notebook.add(frame_admin, text="admin")
+    notebook.add(frame_user, text="user")
+
     def map_clear():
         map_widget.delete_all_marker()
         map_widget.delete_all_path()
 
+    def generate_route_text():
+        if route_var.get():
+            l1_1.config(text=f'Расписание и остановки маршрута № {route_var.get()}')
+        else:
+            l1_1.config(text=f'Расписание и остановки маршрута')
+
     def radiobutton_command():
         map_clear()
+        generate_route_text()
 
         for widget in frame1_2.winfo_children():
             widget.destroy()
@@ -132,9 +157,6 @@ def startMain():
         direction_var.set(False)
 
         recreate_bus_stop_list(bus_stops)
-
-        l1_4 = ttk.Label(frame1_2, text='Выбор направления', padding=8, font=('Bolt', 12))
-        l1_4.grid(column=0, row=0, sticky='n')
 
         recreate_direction_view()
 
@@ -166,16 +188,23 @@ def startMain():
         first_variation = db.get_end_bus_stop(route_var.get(), False, False)
         second_variation = db.get_end_bus_stop(route_var.get(), True, False)
 
+        clear_frame(frame1_2)
+
         dict_direction = {
             False: f'{first_variation[0]}→{first_variation[1]}',
             True: f'{second_variation[0]}→{second_variation[1]}',
         }
+
+        l1_4 = ttk.Label(frame1_2, text='Выбор направления', padding=8, font=('Bolt', 12))
+        l1_4.grid(column=0, row=0, sticky='n')
+
         for direction in dict_direction:
             ttk.Radiobutton(frame1_2,
                             text=dict_direction[direction],
                             variable=direction_var,
                             value=direction,
                             command=direction_command,
+                            style="Default.TRadiobutton"
                             ).grid(padx=8, pady=4, )
 
     def direction_command():
@@ -194,8 +223,7 @@ def startMain():
 
     def create_bus_stops(bus_stops):
         def click_on_marker(marker):
-
-            trans_list = list(map(str,db.info_about_bus_stop(marker.position)))
+            trans_list = list(map(str, db.info_about_bus_stop(marker.position)))
             trans_str = ', '.join(trans_list)
 
             popup = tk.Toplevel()  # Создаем новое окно
@@ -203,7 +231,7 @@ def startMain():
             popup.overrideredirect(True)
 
             # Определяем текст окна
-            frame = tk.Frame(popup, relief=tk.RIDGE, borderwidth=4,  bg="blue")
+            frame = tk.Frame(popup, relief=tk.RIDGE, borderwidth=4, bg="blue")
             frame.pack()  # Отступы для создания видимой границы
 
             # Размещаем метку внутри рамки
@@ -225,13 +253,97 @@ def startMain():
                                   icon=images_dict['bus_icon_img'],
                                   command=click_on_marker)
 
+    def create_route_radiobutton():
+        for route_number in dict_routes:
+            if checkbutton_state(route_number):
+                ttk.Radiobutton(frame2_1,
+                                text=dict_routes[route_number]['name'],
+                                variable=route_var,
+                                value=route_number,
+                                command=radiobutton_command,
+                                compound='left',
+                                image=dict_routes[route_number]['image'],
+                                style="TRadiobutton"
+                                ).grid(column=0, row=route_number, sticky='w')
+
+    create_route_radiobutton()
+    root.option_add("*tearOff", tk.FALSE)
+
+    def refresh_map():
+        map_clear()
+        bus_stops_list.delete(0, tk.END)
+        clear_frame(frame1_2)
+        clear_frame(frame2_1)
+        create_route_radiobutton()
+        route_var.set(0)
+        generate_route_text()
+        l1_3['text'] = ''
+
+    def edit_menu_radiobutton():
+        match map_var.get():
+            case 1:
+                map_widget.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
+            case 2:
+                map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
+        pass
+
+    file_menu = tk.Menu()
+    file_menu.add_command(label="Save")
+    file_menu.add_separator()
+    file_menu.add_command(label="Exit", command=lambda: root.destroy())
+
+    view_menu = tk.Menu()
+    view_menu.add_radiobutton(label='Карта 1', command=edit_menu_radiobutton, value=1, variable=map_var)
+    view_menu.add_radiobutton(label='Карта 2', command=edit_menu_radiobutton, value=2, variable=map_var)
+    view_menu.add_separator()
+    view_menu.add_command(label='refresh', command=refresh_map)
+
+    main_menu = tk.Menu()
+    main_menu.add_cascade(label="File", menu=file_menu)
+    main_menu.add_cascade(label="Edit")
+    main_menu.add_cascade(label="View", menu=view_menu)
+
+    root.config(menu=main_menu)
+
+    frame_admin_1 = tk.Frame(frame_admin, borderwidth=1, relief=tk.SOLID)
+    frame_admin_1.grid_propagate(False)
+    frame_admin_1.grid(column=0, row=0, sticky='nsew', rowspan=3)
+
+    frame_admin_2 = tk.Frame(frame_admin, borderwidth=1, relief=tk.SOLID)
+    frame_admin_2.grid_propagate(False)
+    frame_admin_2.grid(column=1, row=0, sticky='nsew', rowspan=3)
+
+    frame_admin_3 = tk.Frame(frame_admin, borderwidth=1, relief=tk.SOLID)
+    frame_admin_3.grid_propagate(False)
+    frame_admin_3.grid(column=2, row=0, sticky='nsew', rowspan=3)
+
+    for i in range(0, 3):
+        frame_admin.columnconfigure(index=i, weight=1)
+        frame_admin.rowconfigure(index=i, weight=1)
+
+    def activateRoute(route_number):
+        if checkbox_values[route_number].get() == 1:
+            showinfo(title="Info", message="Включено")
+        else:
+            showinfo(title="Info", message="Отключено")
+        db.change_route_state(route_number)
+        refresh_map()
+
+    style_check = ttk.Style()
+    style_check.configure('TCheckbutton', font=('Helvetica', 20))
+    checkbox_values = {}
+
     for route in dict_routes:
-        ttk.Radiobutton(frame2_1,
+        v = tk.IntVar()
+        v.set(checkbutton_state(route))
+        checkbox_values[route] = v
+        ttk.Checkbutton(frame_admin_1,
                         text=dict_routes[route]['name'],
-                        variable=route_var,
-                        value=route,
-                        command=radiobutton_command,
                         compound='left',
-                        image=dict_routes[route]['image']
-                        ).grid(column=0, row=route, sticky='w')
+                        image=dict_routes[route]['image'],
+                        style='TCheckbutton',
+                        variable=v,
+                        command=lambda r=route: activateRoute(r),
+                        ).grid(padx=(100, 0), ipady=20, sticky='w')
+
     root.mainloop()

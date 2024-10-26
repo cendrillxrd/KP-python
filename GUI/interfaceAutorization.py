@@ -55,8 +55,12 @@ def open_window():
 
 def verify_login(username, password, login_window):
     if db.user_check(username, password):
-        login_window.destroy()
-        startMain()
+        if db.is_admin(username):
+            login_window.destroy()
+            startMain(True)
+        else:
+            login_window.destroy()
+            startMain(False)
     else:
         messagebox.showerror("Ошибка", "Неверный логин или пароль")
 
