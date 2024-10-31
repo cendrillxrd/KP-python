@@ -29,7 +29,7 @@ def clear_frame(frame):
         widget.destroy()
 
 
-def startMain(is_admin):
+def startMain(is_admin, is_driver):
     root = tk.Tk()
     root.title("Автобусные маршруты")
     root.geometry("1400x725+30+30")
@@ -77,6 +77,7 @@ def startMain(is_admin):
 
     frame_admin = tk.Frame(notebook)
     frame_user = tk.Frame(notebook)
+    frame_driver = tk.Frame(notebook)
 
     # create map widget
     map_widget = tkintermapview.TkinterMapView(frame_user, width=800, height=700, corner_radius=10)
@@ -131,6 +132,8 @@ def startMain(is_admin):
 
     if is_admin:
         notebook.add(frame_admin, text="admin")
+    if is_driver:
+        notebook.add(frame_driver, text="driver")
     notebook.add(frame_user, text="user")
 
     def map_clear():
@@ -205,7 +208,8 @@ def startMain(is_admin):
                             variable=direction_var,
                             value=direction,
                             command=direction_command,
-                            style="Default.TRadiobutton"
+                            style="Default.TRadiobutton",
+                            takefocus=False
                             ).grid(padx=8, pady=4, )
 
     def direction_command():
@@ -264,7 +268,8 @@ def startMain(is_admin):
                                 command=radiobutton_command,
                                 compound='left',
                                 image=dict_routes[route_number]['image'],
-                                style="TRadiobutton"
+                                style="TRadiobutton",
+                                takefocus=False
                                 ).grid(column=0, row=route_number, sticky='w')
 
     create_route_radiobutton()
@@ -364,6 +369,7 @@ def startMain(is_admin):
                         style='TCheckbutton',
                         variable=v,
                         command=lambda r=route: activateRoute(r),
+                        takefocus = False
                         ).grid(padx=(100, 0), ipady=20, sticky='w')
 
     # наполнение frame_admin_2
@@ -399,5 +405,7 @@ def startMain(is_admin):
                style='TButton',
                command=set_timetable
                ).grid(sticky='w', padx=(145, 0), pady=30)
+
+    # наполнение frame_admin_1
 
     root.mainloop()

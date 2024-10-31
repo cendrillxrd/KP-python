@@ -15,6 +15,7 @@ class User(BaseModel):
     login = TextField()
     password = TextField()
     admin = BooleanField()
+    driver = BooleanField()
 
     class Meta:
         db_table = 'users'

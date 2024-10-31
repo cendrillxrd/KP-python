@@ -47,7 +47,7 @@ def set_route(path_list, number, name_route, direction, time, active_state=True)
         ).save()
 
 
-def set_user(login, password):
+def set_user(login, password, driver):
     if login == '' or password == '':
         return False
     with db:
@@ -56,7 +56,8 @@ def set_user(login, password):
         else:
             User(login=login,
                  password=password,
-                 admin=False).save()
+                 admin=False,
+                 driver=driver).save()
             return True
 
 
@@ -138,6 +139,10 @@ def delete_stops(id):
 
 def is_admin(username):
     return User.get(login=username).admin
+
+
+def is_driver(username):
+    return User.get(login=username).driver
 
 
 def is_active(route_number):
