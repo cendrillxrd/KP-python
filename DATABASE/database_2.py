@@ -151,3 +151,14 @@ def change_route_state(route_number):
         for route in route_list:
             route.active = not route.active
             route.save()
+
+
+def change_time_value(route_number, time_value):
+    with db:
+        time_list = (TimeTable
+                     .select(TimeTable, BusRoute)
+                     .join(BusRoute, on=(TimeTable.path_id == BusRoute.id))
+                     .where(BusRoute.number == route_number))
+        for time in time_list:
+            time.time_table = time_value
+            time.save()

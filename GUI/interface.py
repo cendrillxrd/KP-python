@@ -1,12 +1,9 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter.messagebox import showinfo
+from tkinter import ttk, messagebox
 
 import tkintermapview
 from PIL import Image, ImageTk
 import DATABASE.database_2 as db
-
-import Classes.classes as cl
 
 
 def load_image(image_path, size):
@@ -41,20 +38,21 @@ def startMain(is_admin):
     route_var = tk.IntVar()
     direction_var = tk.BooleanVar()
     map_var = tk.IntVar(value=1)
+    theme_var = tk.StringVar(value='white')
 
     new_size_for_icon = (32, 32)
     new_size_for_numbers = (35, 35)
 
     images_dict = {
-        'seven_img': load_image("C:/Users/Admin/PycharmProjects/КП/Resources/seven.png",
+        'seven_img': load_image("Resources/seven.png",
                                 new_size_for_numbers),
-        'two_img': load_image("C:/Users/Admin/PycharmProjects/КП/Resources/two.png",
+        'two_img': load_image("Resources/two.png",
                               new_size_for_numbers),
-        'seventy_seven_img': load_image("C:/Users/Admin/PycharmProjects/КП/Resources/seventy_seven.png",
+        'seventy_seven_img': load_image("Resources/seventy_seven.png",
                                         new_size_for_numbers),
-        'bus_icon_img': load_image("C:/Users/Admin/PycharmProjects/КП/Resources/bus_stop.png",
+        'bus_icon_img': load_image("Resources/bus_stop.png",
                                    new_size_for_icon),
-        'bus_autoriz_img': load_image("C:/Users/Admin/PycharmProjects/КП/Resources/bus_autoriz.png",
+        'bus_autoriz_img': load_image("Resources/bus_autoriz.png",
                                       (100, 100))
     }
 
@@ -74,8 +72,11 @@ def startMain(is_admin):
     notebook.pack(fill=tk.X)
     notebook.pack_propagate(False)
 
-    frame_admin = ttk.Frame(notebook)
-    frame_user = ttk.Frame(notebook)
+    style0 = ttk.Style()
+    style0.configure("TFrame", bg='white')
+
+    frame_admin = tk.Frame(notebook)
+    frame_user = tk.Frame(notebook)
 
     # create map widget
     map_widget = tkintermapview.TkinterMapView(frame_user, width=800, height=700, corner_radius=10)
@@ -85,28 +86,28 @@ def startMain(is_admin):
 
     map_widget.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
 
-    frame1 = ttk.Frame(frame_user)
+    frame1 = tk.Frame(frame_user)
     frame1.grid(column=1, row=0, sticky='ns')
     frame1.rowconfigure(index=0, weight=1)
     frame1.rowconfigure(index=1, weight=1)
 
-    frame1_1 = ttk.Frame(frame1)
+    frame1_1 = tk.Frame(frame1)
     frame1_1.grid(column=0, row=0, sticky='nsew')
 
     l1_1 = ttk.Label(frame1_1, text='Расписание и остановки маршрута №', padding=8, font=('Bolt', 12))
     l1_1.grid(padx=10, pady=10)
 
-    frame1_2 = ttk.Frame(frame1)
+    frame1_2 = tk.Frame(frame1)
     frame1_2.grid(column=0, row=1, sticky='nsew')
     frame1_2.columnconfigure(index=0, weight=1)
     frame1_2.rowconfigure(index=0, weight=0)
 
-    frame2 = ttk.Frame(frame_user, padding=10)
+    frame2 = tk.Frame(frame_user, padx=10, pady=10)
     frame2.grid(column=2, row=0, sticky='nsew')
     l2 = ttk.Label(frame2, text='Выберете маршрут', padding=8, font=('Bolt', 12))
     l2.grid(column=0, row=0, sticky='n')
 
-    frame2_1 = ttk.Frame(frame2, padding=8)
+    frame2_1 = tk.Frame(frame2, padx=10, pady=10)
     frame2_1.grid()
 
     bus_stops_list = tk.Listbox(frame1_1, height=20)
@@ -287,14 +288,29 @@ def startMain(is_admin):
                 map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
         pass
 
+    def change_theme(widget=notebook):
+        try:
+            widget.config(bg=theme_var.get())
+        except tk.TclError:
+            pass  # Игнорируем виджеты, у которых нет параметра bg
+
+            # Рекурсивно обходим всех дочерних виджетов
+        for child in widget.winfo_children():
+            change_theme(child)
+
     file_menu = tk.Menu()
     file_menu.add_command(label="Save")
     file_menu.add_separator()
     file_menu.add_command(label="Exit", command=lambda: root.destroy())
 
+    theme_menu = tk.Menu()
+    theme_menu.add_radiobutton(label='white', command=change_theme, value='#F0F0F0', variable=theme_var)
+    theme_menu.add_radiobutton(label='black', command=change_theme, value='#3C3B3C', variable=theme_var)
+
     view_menu = tk.Menu()
     view_menu.add_radiobutton(label='Карта 1', command=edit_menu_radiobutton, value=1, variable=map_var)
     view_menu.add_radiobutton(label='Карта 2', command=edit_menu_radiobutton, value=2, variable=map_var)
+    view_menu.add_cascade(label='theme', menu=theme_menu)
     view_menu.add_separator()
     view_menu.add_command(label='refresh', command=refresh_map)
 
@@ -317,15 +333,19 @@ def startMain(is_admin):
     frame_admin_3.grid_propagate(False)
     frame_admin_3.grid(column=2, row=0, sticky='nsew', rowspan=3)
 
+    # наполнение frame_admin_1
     for i in range(0, 3):
         frame_admin.columnconfigure(index=i, weight=1)
         frame_admin.rowconfigure(index=i, weight=1)
 
+    ttk.Label(frame_admin_1, text='Активация маршрута', font=('Helvetica', 20)
+              ).grid(padx=(100, 0), ipady=20, sticky='w')
+
     def activateRoute(route_number):
         if checkbox_values[route_number].get() == 1:
-            showinfo(title="Info", message="Включено")
+            messagebox.showinfo(title="Info", message="Включено")
         else:
-            showinfo(title="Info", message="Отключено")
+            messagebox.showinfo(title="Info", message="Отключено")
         db.change_route_state(route_number)
         refresh_map()
 
@@ -334,8 +354,8 @@ def startMain(is_admin):
     checkbox_values = {}
 
     for route in dict_routes:
-        v = tk.IntVar()
-        v.set(checkbutton_state(route))
+        v = tk.IntVar(value=checkbutton_state(route))
+
         checkbox_values[route] = v
         ttk.Checkbutton(frame_admin_1,
                         text=dict_routes[route]['name'],
@@ -345,5 +365,39 @@ def startMain(is_admin):
                         variable=v,
                         command=lambda r=route: activateRoute(r),
                         ).grid(padx=(100, 0), ipady=20, sticky='w')
+
+    # наполнение frame_admin_2
+    ttk.Label(frame_admin_2, text='Настройка расписания', font=('Helvetica', 20)
+              ).grid(padx=(90, 0), ipady=20, sticky='w')
+
+    def on_select(event):
+        frame_admin_2.focus()
+
+    routes = [route_number for route_number in dict_routes]
+    combobox = ttk.Combobox(frame_admin_2, values=routes, font=('Helvetica', 18), state="readonly")
+    combobox.grid(padx=(94, 0), sticky='w', pady=20)
+    combobox.bind("<<ComboboxSelected>>", on_select)
+
+    ttk.Label(frame_admin_2, text='Введите время ожидания', font=('Helvetica', 20)
+              ).grid(padx=(70, 0), ipady=20, sticky='w')
+
+    time_entry = ttk.Entry(frame_admin_2, font=('Helvetica', 19))
+    time_entry.grid(padx=(93, 0), sticky='w')
+
+    def set_timetable():
+        try:
+            db.change_time_value(int(combobox.get()), int(time_entry.get()))
+            refresh_map()
+            messagebox.showinfo(title="Info", message="Расписание изменено")
+        except:
+            messagebox.showerror("Ошибка", "Не корректные данные")
+
+    style_button = ttk.Style()
+    style_button.configure('TButton', font=('Bolt', 20))
+    ttk.Button(frame_admin_2,
+               text='Принять',
+               style='TButton',
+               command=set_timetable
+               ).grid(sticky='w', padx=(145, 0), pady=30)
 
     root.mainloop()

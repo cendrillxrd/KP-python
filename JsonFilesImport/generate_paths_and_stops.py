@@ -28,7 +28,7 @@ def extract_stops(data, dir):
 
 def generate_info(path_number, dirrection, time):
     # Загружаем данные (замените на ваш источник данных)
-    with open(f'C:/Users/Admin/PycharmProjects/КП/JsonFilesImport/data{path_number}.json', 'r', encoding='utf-8') as f:
+    with open(f'JsonFilesImport/data{path_number}.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
 
     if dirrection:

@@ -43,7 +43,7 @@ def open_window():
                command=lambda: verify_login(login_entry.get(), password_entry.get(), autorization_root),
                style='TButton').grid(column=0, columnspan=2, padx=10, pady=10)
 
-    image = Image.open("C:/Users/Admin/PycharmProjects/КП/Resources/bus_autoriz.png")
+    image = Image.open("Resources/bus_autoriz.png")
     image = image.resize((100, 100))
     photo = ImageTk.PhotoImage(image)
     # Создаем метку и устанавливаем изображение
@@ -99,4 +99,4 @@ def reg_user_command(login, password, window, autorization_root):
         autorization_root.deiconify()
         window.destroy()
     else:
-        messagebox.showerror("Инфо", "Ошибка регистрации, такой пользователь уже существует")
+        messagebox.showerror("Инфо", "Ошибка регистрации")
