@@ -369,7 +369,7 @@ def startMain(is_admin, is_driver):
                         style='TCheckbutton',
                         variable=v,
                         command=lambda r=route: activateRoute(r),
-                        takefocus = False
+                        takefocus=False
                         ).grid(padx=(100, 0), ipady=20, sticky='w')
 
     # наполнение frame_admin_2
@@ -380,9 +380,9 @@ def startMain(is_admin, is_driver):
         frame_admin_2.focus()
 
     routes = [route_number for route_number in dict_routes]
-    combobox = ttk.Combobox(frame_admin_2, values=routes, font=('Helvetica', 18), state="readonly")
-    combobox.grid(padx=(94, 0), sticky='w', pady=20)
-    combobox.bind("<<ComboboxSelected>>", on_select)
+    combobox_paths1 = ttk.Combobox(frame_admin_2, values=routes, font=('Helvetica', 18), state="readonly")
+    combobox_paths1.grid(padx=(94, 0), sticky='w', pady=20)
+    combobox_paths1.bind("<<ComboboxSelected>>", on_select)
 
     ttk.Label(frame_admin_2, text='Введите время ожидания', font=('Helvetica', 20)
               ).grid(padx=(70, 0), ipady=20, sticky='w')
@@ -392,7 +392,7 @@ def startMain(is_admin, is_driver):
 
     def set_timetable():
         try:
-            db.change_time_value(int(combobox.get()), int(time_entry.get()))
+            db.change_time_value(int(combobox_paths1.get()), int(time_entry.get()))
             refresh_map()
             messagebox.showinfo(title="Info", message="Расписание изменено")
         except:
@@ -406,6 +406,62 @@ def startMain(is_admin, is_driver):
                command=set_timetable
                ).grid(sticky='w', padx=(145, 0), pady=30)
 
-    # наполнение frame_admin_1
+    # наполнение frame_admin_3
+    ttk.Label(frame_admin_3, text='Работа с водителями', font=('Helvetica', 20)
+              ).grid(padx=(100, 0), ipady=20, sticky='w')
+
+    drivers = [driver for driver in db.get_drivers()]
+    combobox_drivers = ttk.Combobox(frame_admin_3, values=drivers, font=('Helvetica', 18), state="readonly")
+    combobox_drivers.grid(padx=(94, 0), sticky='w', pady=20)
+    combobox_drivers.bind("<<ComboboxSelected>>", on_select)
+
+    ttk.Label(frame_admin_3, text='Выберете маршрут', font=('Helvetica', 20)
+              ).grid(padx=(110, 0), ipady=20, sticky='w')
+
+    routes = [route_number for route_number in dict_routes]
+    combobox_paths2 = ttk.Combobox(frame_admin_3, values=routes, font=('Helvetica', 18), state="readonly")
+    combobox_paths2.grid(padx=(94, 0), sticky='w')
+
+    combobox_paths2.bind("<<ComboboxSelected>>", on_select)
+
+    def set_driver(path_number):
+        try:
+            res = db.change_driver_path(combobox_drivers.get(), path_number)
+            if res:
+                refresh_map()
+                if path_number != 0:
+                    messagebox.showinfo(title="Info", message="Водитель назначен")
+                else:
+                    messagebox.showinfo(title="Info", message="Водитель снят с линии")
+            else:
+                messagebox.showinfo(title="Info",
+                                    message=f"Этот маршрут уже назначен для водителя"
+                                            f" {db.get_driver_name_with_path(path_number)}")
+        except:
+            messagebox.showerror("Ошибка", "Не корректные данные")
+
+    def get_info_driver():
+        try:
+            messagebox.showinfo(title="Info", message=db.get_info_driver(combobox_drivers.get()))
+        except:
+            messagebox.showerror("Ошибка", "Не корректные данные")
+
+    ttk.Button(frame_admin_3,
+               text='Назначить маршрут',
+               style='TButton',
+               command=lambda: set_driver(int(combobox_paths2.get()))
+               ).grid(sticky='w', padx=(105, 0), pady=(30, 10))
+
+    ttk.Button(frame_admin_3,
+               text='Снять с линии',
+               style='TButton',
+               command=lambda: set_driver(0)
+               ).grid(sticky='w', padx=(140, 0))
+
+    ttk.Button(frame_admin_3,
+               text='Инфо',
+               style='TButton',
+               command=get_info_driver
+               ).grid(sticky='w', padx=(150, 0), pady=10)
 
     root.mainloop()

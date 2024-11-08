@@ -4,7 +4,7 @@ import Classes.classes as cl
 import re
 
 with db:
-    db.create_tables([User])
+    db.create_tables([DriverRoute])
 
 
 def set_bus_stops(stops_list, number, direction):
@@ -167,3 +167,56 @@ def change_time_value(route_number, time_value):
         for time in time_list:
             time.time_table = time_value
             time.save()
+
+
+def get_drivers():
+    with db:
+        driver_list = User.select().where(User.driver == True, User.admin == False)
+        result_list = []
+        for driver in driver_list:
+            result_list.append(driver.login)
+        return result_list
+
+
+def add_driver_route(name):
+    with db:
+        driver = User.get(User.login == name)
+        DriverRoute.create(user_id=driver.id, route=0)
+
+
+def remove_driver_route(name):
+    with db:
+        driver = User.get(User.login == name)
+        query = DriverRoute.get(DriverRoute.user_id == driver.id)
+        query.delete_instance()
+
+
+def change_driver_path(name, path_number):
+    with db:
+
+        driver = User.get(User.login == name)
+        try:
+            route = DriverRoute.get(DriverRoute.route == path_number)
+            return False
+        except:
+            route = DriverRoute.get(DriverRoute.user_id == driver.id)
+            route.route = path_number
+            route.save()
+            return True
+
+
+def get_info_driver(name):
+    with db:
+        driver = User.get(User.login == name)
+        route = DriverRoute.get(DriverRoute.user_id == driver.id)
+        path_number = 0
+        if route.route != 0:
+            path_number = route.route
+        return (f'Водитель - {driver.login}\n'
+                f'Маршрут - {path_number}')
+
+
+def get_driver_name_with_path(route):
+    route = DriverRoute.get(DriverRoute.route == route)
+    driver = User.get(User.id == route.user_id)
+    return driver.login

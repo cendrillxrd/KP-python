@@ -106,6 +106,8 @@ def open_reg_window(autorization_root, d_var):
 
 def reg_user_command(login, password, window, autorization_root, d_var):
     user_set = db.set_user(login, password, d_var.get())
+    if d_var:
+        db.add_driver_route(login)
     if user_set:
         messagebox.showinfo("Инфо", "Регистрация выполнена успешно")
         autorization_root.deiconify()

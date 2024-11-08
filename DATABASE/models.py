@@ -20,6 +20,13 @@ class User(BaseModel):
     class Meta:
         db_table = 'users'
 
+class DriverRoute(BaseModel):
+    user_id = ForeignKeyField(User, on_delete='CASCADE')
+    route = IntegerField()
+
+    class Meta:
+        db_table = 'driver_routes'
+
 
 class BusStop(BaseModel):
     name = TextField()
