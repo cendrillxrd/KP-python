@@ -220,3 +220,9 @@ def get_driver_name_with_path(route):
     route = DriverRoute.get(DriverRoute.route == route)
     driver = User.get(User.id == route.user_id)
     return driver.login
+
+
+def get_driver_path(username):
+    driver = User.get(User.login == username)
+    route = DriverRoute.get(DriverRoute.user_id == driver.id)
+    return route.route

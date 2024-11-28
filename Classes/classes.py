@@ -31,3 +31,10 @@ class Schedule:
         self.id = id
         self.path_id = path_id
         self.time = time
+
+class User:
+    def __init__(self, login, password, is_admin, is_driver):
+        self.login = login
+        self.password = password
+        self.is_admin = is_admin
+        self.is_driver = is_driver

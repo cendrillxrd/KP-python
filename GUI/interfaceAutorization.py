@@ -5,6 +5,7 @@ from tkinter import messagebox
 import customtkinter as ctk
 from PIL import Image, ImageTk
 import DATABASE.database_2 as db
+import Classes.classes as cl
 
 
 def open_window():
@@ -57,7 +58,8 @@ def open_window():
 def verify_login(username, password, login_window):
     if db.user_check(username, password):
         login_window.destroy()
-        startMain(db.is_admin(username), db.is_driver(username))
+        user = cl.User(username, password, db.is_admin(username), db.is_driver(username))
+        startMain(user)
     else:
         messagebox.showerror("Ошибка", "Неверный логин или пароль")
 
